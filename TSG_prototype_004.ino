@@ -21,7 +21,7 @@
 #include <LSM9DS1_Registers.h>
 #include <LSM9DS1_Types.h>
 #include <SoftwareSerial.h>
-
+#include <MsTimer2.h>            //https://github.com/PaulStoffregen/MsTimer2
 
 
 //#define ADAddr 0x48//
@@ -116,8 +116,21 @@ void setup(void) {
   setupSoftwareSerial();
   //=======================================================
 
+
+  //===MotionSensorのタイマー化 =================
+  delay(100);
+  //MsTimer2::set(100, test);
+  //MsTimer2::start();
+  //=======================================================
+
   
 }
+
+void test()
+{
+  Serial.println(time);
+}
+
 
 /**
  * 　==================================================================================================================================================
@@ -498,4 +511,6 @@ char* readDataUntilComma(int s)
   }
   
 }
+
+
 
