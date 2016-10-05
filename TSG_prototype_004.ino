@@ -58,10 +58,12 @@ boolean switchOn;
 boolean switchRelease;
 
 
-String motionData;
+volatile boolean enableWrite = false;
 
 ///////////////////////カルマンフィルタ/////////////////////////////
-unsigned long time;
+String motionData;
+volatile unsigned long time;
+
 ////////////////////////////////////////////////////////////////
 
 //----------------------------------------------------------------------
@@ -119,7 +121,8 @@ void setup(void) {
 
   //===MotionSensorのタイマー化 =================
   delay(100);
-  //MsTimer2::set(100, test);
+  motionData = "";
+  //MsTimer2::set(100, updateMotionSensors);
   //MsTimer2::start();
   //=======================================================
 
@@ -128,7 +131,8 @@ void setup(void) {
 
 void test()
 {
-  Serial.println(time);
+  Serial.println("");
+
 }
 
 
@@ -194,9 +198,6 @@ void loop(void) {
   //GPS MAIN ==========================================================
   char dt = 0 ;
 
-  motionData = "";
-  time = millis();
-
     // センテンスデータが有るなら処理を行う
     if (g_gps.available()) {
 
@@ -233,7 +234,7 @@ void loop(void) {
                
                // read three sensors and append to the string:
                //記録用のセンサー値を取得
-               updateMotionSensors();
+               //updateMotionSensors();
 
                //SDカードへの出力
                writeDataToSdcard();
@@ -304,6 +305,7 @@ void sdcardClose()
 /**
  * writeDataToSdcard
  */
+ 
 void writeDataToSdcard()
 {
 
@@ -321,6 +323,9 @@ void writeDataToSdcard()
     Serial.print(gpsData);
     Serial.println(motionData);
     Serial.println(F("================================"));
+
+    //クリア
+    motionData = "";;
   }
   // if the file isn't open, pop up an error:
   else {
@@ -333,46 +338,55 @@ void writeDataToSdcard()
 /**
  * updateMotionSensors
  */
-String updateMotionSensors()
+
+void updateMotionSensors()
 {
-  imu.readGyro();
-  imu.readAccel();
-  imu.readMag();
+  if(enableWrite){
+
+      //時間の更新
+      double dt = (double)(millis() - time); // Calculate delta time  
+
+      if(dt < 100)
+        return;
 
 
-  //時間の更新
-  double dt = (double)(millis() - time) / 1000; // Calculate delta time  
-  time = millis();
-
-  
-  motionData += "$MOTION"; 
-  motionData += ",";
-
-  motionData += dt; 
-  motionData += ",";
-
-  motionData += imu.ax;
-  motionData += ",";
-  motionData += imu.ay;
-  motionData += ",";
-  motionData += imu.az;
-  motionData += ",";
-
-  motionData += imu.gx;
-  motionData += ",";
-  motionData += imu.gy;
-  motionData += ",";
-  motionData += imu.gz;
-  motionData += ",";
-  
-  motionData += imu.gx;
-  motionData += ",";
-  motionData += imu.gy;
-  motionData += ",";
-  motionData += imu.gz;
-
-
-  motionData += "\n";
+      imu.readGyro();
+      imu.readAccel();
+      imu.readMag();    
+    
+      
+      time = millis();
+    
+      
+      motionData += "$MOTION"; 
+      motionData += ",";
+    
+      motionData += dt; 
+      motionData += ",";
+    
+      motionData += imu.ax;
+      motionData += ",";
+      motionData += imu.ay;
+      motionData += ",";
+      motionData += imu.az;
+      motionData += ",";
+    
+      motionData += imu.gx;
+      motionData += ",";
+      motionData += imu.gy;
+      motionData += ",";
+      motionData += imu.gz;
+      motionData += ",";
+      
+      motionData += imu.gx;
+      motionData += ",";
+      motionData += imu.gy;
+      motionData += ",";
+      motionData += imu.gz;
+    
+    
+      motionData += "\n";
+  }
 }
 
 
@@ -459,11 +473,13 @@ boolean gpsIsReady()
                  //次のコンマまでのデータを呼び出し
                  if( strncmp("A", readDataUntilComma(i+1), 1) == 0 ){
                    //Serial.print("O:");
+                   enableWrite = true;
                    return true;
                  }
                  else{
                    //Serial.print("X:");
                    //Serial.print( (char *)SentencesData );
+                   enableWrite = false;
                    return false;
                  }
             }
