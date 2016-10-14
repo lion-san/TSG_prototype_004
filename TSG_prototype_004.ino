@@ -45,6 +45,7 @@
 
 LSM9DS1 imu;
 
+
 //###############################################
 //MicroSD 
 //const int chipSelect = 4;//Arduino UNO
@@ -217,12 +218,16 @@ void loop(void) {
 
   if( millis() - delta1 > UPDATE_INTERVAL )
   {
+    //Serial.print("DELTA1::");
+    //Serial.println(millis() - delta1);
     updateMotionSensors();
     delta1 = millis();
   }
 
   if( millis() - delta2 > DATAPUSH_INTERVAL )
   {
+    //Serial.print("DELTA2::");
+    //Serial.println(millis() - delta2);
     pushMotionData();
     delta2 = millis();
   }
@@ -253,8 +258,8 @@ void loop(void) {
           if (dt == 0x0a || SentencesNum >= SENTENCES_BUFLEN) {
 
             SentencesData[SentencesNum] = '\0';
-            test("get LF");
-            Serial.println((char *)SentencesData);
+
+            //Serial.println((char *)SentencesData);
             //GPS情報の取得
             //getGpsInfo();
 
@@ -399,7 +404,7 @@ void pushMotionData()
       if(dt < 100)
         return;
 
-      updateMotionSensors();
+      //updateMotionSensors();
     
       
       time = millis();
