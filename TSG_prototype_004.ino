@@ -37,6 +37,8 @@
 #define TX 9                            //GPS用のソフトウェアシリアル
 #define SENTENCES_BUFLEN      128        // GPSのメッセージデータバッファの個数
 
+#define UPDATE_INTERVAL        50       //モーションセンサーの値取得間隔
+#define DATAPUSH_INTERVAL     100       //モーションセンサーの値記録間隔
 
 //-------------------------------------------------------------------------
 //[Global valiables]
@@ -78,6 +80,24 @@ boolean isReaded;                       //GPSの読み込みが完了したか�
 String gpsData;                         //GPSの読み込みが完了データ
 
 //======================================================
+
+
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+unsigned long delta;
+
+unsigned long delta1;
+unsigned long delta2;
+void test(String s)
+{
+  Serial.print(millis() - delta);
+  Serial.print("::DEBUG:");
+  Serial.println(s);
+
+  delta = millis();
+  
+}
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 
 void setup(void) {
 
@@ -125,15 +145,13 @@ void setup(void) {
   //MsTimer2::set(100, updateMotionSensors);
   //MsTimer2::start();
   //=======================================================
-
   
+  //DEBUG
+  delta = millis();
+  delta1 = millis();
+  delta2 = millis();
 }
 
-void test()
-{
-  Serial.println("");
-
-}
 
 
 /**
@@ -193,7 +211,24 @@ void loop(void) {
     }
   }
   //END switch ============================================
+
+
+  //START MotionSensor ============================================
+
+  if( millis() - delta1 > UPDATE_INTERVAL )
+  {
+    updateMotionSensors();
+    delta1 = millis();
+  }
+
+  if( millis() - delta2 > DATAPUSH_INTERVAL )
+  {
+    pushMotionData();
+    delta2 = millis();
+  }
   
+  //END MotionSensor ============================================
+
 
   //GPS MAIN ==========================================================
   char dt = 0 ;
@@ -216,14 +251,15 @@ void loop(void) {
              
           // センテンスの最後(LF=0x0Aで判断)
           if (dt == 0x0a || SentencesNum >= SENTENCES_BUFLEN) {
-    
+
             SentencesData[SentencesNum] = '\0';
-    
+            test("get LF");
+            Serial.println((char *)SentencesData);
             //GPS情報の取得
             //getGpsInfo();
 
-            //MotionSensorの値更新
-            updateMotionSensors();
+            //MotionSensorの値更新と保存
+            //pushMotionData();
 
             // センテンスのステータスが"有効"になるまで待つ
             if ( gpsIsReady() )
@@ -337,9 +373,23 @@ void writeDataToSdcard()
 
 /**
  * updateMotionSensors
+ * 
  */
 
 void updateMotionSensors()
+{
+  imu.readGyro();
+  imu.readAccel();
+  imu.readMag();    
+}
+
+
+/**
+ * pushMotionSensor
+ * 
+ *  * @enableWrite    GPS受信 "A"
+ */
+void pushMotionData()
 {
   if(enableWrite){
 
@@ -349,10 +399,7 @@ void updateMotionSensors()
       if(dt < 100)
         return;
 
-
-      imu.readGyro();
-      imu.readAccel();
-      imu.readMag();    
+      updateMotionSensors();
     
       
       time = millis();
@@ -387,8 +434,8 @@ void updateMotionSensors()
     
       motionData += "\n";
   }
-}
 
+}
 
 //===============================================
 //
