@@ -38,7 +38,7 @@
 #define SENTENCES_BUFLEN      128        // GPSのメッセージデータバッファの個数
 
 #define UPDATE_INTERVAL        50       //モーションセンサーの値取得間隔
-#define DATAPUSH_INTERVAL     100       //モーションセンサーの値記録間隔
+#define DATAPUSH_INTERVAL     200       //モーションセンサーの値記録間隔
 
 //-------------------------------------------------------------------------
 //[Global valiables]
@@ -229,7 +229,7 @@ void loop(void) {
     //Serial.print("DELTA2::");
     //Serial.println(millis() - delta2);
     pushMotionData();
-    delta2 = millis();
+    delta2 = millis(); 
   }
   
   //END MotionSensor ============================================
