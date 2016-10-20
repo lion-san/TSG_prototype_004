@@ -430,11 +430,11 @@ void pushMotionData()
       motionData += imu.gz;
       motionData += ",";
       
-      motionData += imu.gx;
+      motionData += imu.mx;
       motionData += ",";
-      motionData += imu.gy;
+      motionData += imu.my;
       motionData += ",";
-      motionData += imu.gz;
+      motionData += imu.mz;
     
     
       motionData += "\n";
