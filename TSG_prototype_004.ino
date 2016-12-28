@@ -415,26 +415,29 @@ void pushMotionData()
     
       motionData += dt; 
       motionData += ",";
-    
-      motionData += imu.ax;
+
+      //[g]
+      motionData += imu.calcAccel(imu.ax);
       motionData += ",";
-      motionData += imu.ay;
+      motionData += imu.calcAccel(imu.ay);
       motionData += ",";
-      motionData += imu.az;
+      motionData += imu.calcAccel(imu.az);
       motionData += ",";
-    
-      motionData += imu.gx;
+
+      //[deg/s]
+      motionData += imu.calcGyro(imu.gx);
       motionData += ",";
-      motionData += imu.gy;
+      motionData += imu.calcGyro(imu.gy);
       motionData += ",";
-      motionData += imu.gz;
+      motionData += imu.calcGyro(imu.gz);
       motionData += ",";
-      
-      motionData += imu.mx;
+
+      //[gauss]
+      motionData += imu.calcMag(imu.mx);
       motionData += ",";
-      motionData += imu.my;
+      motionData += imu.calcMag(imu.my);
       motionData += ",";
-      motionData += imu.mz;
+      motionData += imu.calcMag(imu.mz);
     
     
       motionData += "\n";
